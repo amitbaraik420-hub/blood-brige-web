@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
     try {
      
-      const res = await fetch('http://localhost:8000/api/v1/profile', {
+      const res = await fetch('https://server-site-rose.vercel.app/api/v1/profile', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

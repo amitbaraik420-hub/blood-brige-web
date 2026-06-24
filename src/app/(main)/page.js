@@ -9,7 +9,7 @@ export default function HomePage() {
 
  
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/donation-requests')
+    fetch('https://server-site-rose.vercel.app/api/v1/donation-requests')
       .then((res) => res.json())
       .then((data) => {
         setRequests(data);

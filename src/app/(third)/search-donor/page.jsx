@@ -16,7 +16,7 @@ export default function SearchDonorPage() {
 
  
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/districts')
+    fetch('https://server-site-rose.vercel.app/api/v1/districts')
       .then((res) => res.json())
       .then((data) => setDistricts(data))
       .catch((err) => console.error('Error fetching districts:', err));
@@ -29,7 +29,7 @@ export default function SearchDonorPage() {
       return;
     }
    
-    fetch(`http://localhost:8000/api/v1/upazilas?districtId=${district}`)
+    fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?districtId=${district}`)
       .then((res) => res.json())
       .then((data) => setUpazilas(data))
       .catch((err) => console.error('Error fetching upazilas:', err));
@@ -46,7 +46,7 @@ export default function SearchDonorPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/donors/search?bloodGroup=${encodeURIComponent(bloodGroup)}&district=${districtName}&upazila=${upazila}`
+        `https://server-site-rose.vercel.app/api/v1/donors/search?bloodGroup=${encodeURIComponent(bloodGroup)}&district=${districtName}&upazila=${upazila}`
       );
       const data = await res.json();
       setDonors(data);

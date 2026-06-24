@@ -34,7 +34,7 @@ export default function RequestBloodPage() {
 
   
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/districts')
+    fetch('https://server-site-rose.vercel.app/api/v1/districts')
       .then((res) => res.json())
       .then((data) => setDistricts(data))
       .catch((err) => console.error('Error fetching districts:', err));
@@ -45,7 +45,7 @@ export default function RequestBloodPage() {
       setUpazilas([]);
       return;
     }
-    fetch(`http://localhost:8000/api/v1/upazilas?districtId=${district}`)
+    fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?districtId=${district}`)
       .then((res) => res.json())
       .then((data) => setUpazilas(data))
       .catch((err) => console.error('Error fetching upazilas:', err));
@@ -75,7 +75,7 @@ export default function RequestBloodPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/api/v1/donation-requests', {
+      const res = await fetch('https://server-site-rose.vercel.app/api/v1/donation-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

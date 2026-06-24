@@ -24,7 +24,7 @@ export default function DashboardPage() {
     if (!user?.email) return;
 
     const token = localStorage.getItem('token');
-    fetch('http://localhost:8000/api/v1/my-donation-requests', {
+    fetch('https://server-site-rose.vercel.app/api/v1/my-donation-requests', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

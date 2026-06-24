@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Donation Requests', href: '/donation-requests' },
+  { name: 'Profile', href: '/donation-requests' },
   { name: 'Search Donors', href: '/search-donor' },
   { name: 'Request Blood', href: '/request-blood' },
 ];

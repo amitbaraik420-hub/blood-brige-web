@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
  
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/districts')
+    fetch('https://server-site-rose.vercel.app/api/v1/districts')
       .then(res => res.json())
       .then(data => {
         setDistricts(Array.isArray(data) ? data : []);
@@ -44,7 +44,7 @@ export default function RegisterPage() {
       setFormData(prev => ({ ...prev, upazila: '' }));
 
      
-      fetch(`http://localhost:8000/api/v1/upazilas?district_id=${formData.district}`)
+      fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?district_id=${formData.district}`)
         .then(res => res.json())
         .then(data => {
           console.log("Loaded upazilas from server:", data);
@@ -122,7 +122,7 @@ export default function RegisterPage() {
       console.log("Sending to backend:", userData);
 
    
-      const backendRes = await fetch('http://localhost:8000/api/v1/register', {
+      const backendRes = await fetch('https://server-site-rose.vercel.app/api/v1/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(userData)
