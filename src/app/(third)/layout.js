@@ -1,15 +1,17 @@
-import React from 'react'
-import Navbar from '../navbar/page'
-import Footer from '../components/Footer'
-import SearchDonor from './search-donor/page'
+import React from 'react';
+import { AuthProvider } from '@/context/AuthContext'; // 🟢 প্রোভাইডার ইম্পোর্ট করুন
+import Footer from '../components/Footer';
+import Navbar from '../navbar/page';
 
-export default function layout({ children}) {
+export default function SecondLayout({ children }) {
   return (
-    <div>
-            <Navbar />
-            <SearchDonor />
+    // 🟢 পুরো লেআউটকে AuthProvider দিয়ে ঘিরে দিন
+    <AuthProvider>
+      <div>
+        <Navbar />
         {children}
-            <Footer />
-    </div>
-  )
+        <Footer />
+      </div>
+    </AuthProvider>
+  );
 }

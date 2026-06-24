@@ -1,19 +1,19 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { authClient } from "@/app/lib/auth-client";
-import { FiUser, FiMail, FiLock, FiPhone, FiCamera, FiMapPin, FiDroplet } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+import { FiUser, FiMail, FiLock, FiPhone, FiCamera } from 'react-icons/fi';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     gender: 'Male',
     bloodGroup: '',
-    district: '',
-    upazila: '',
+    district: '', 
+    upazila: '',  
     password: '',
     confirmPassword: '',
     image: null
@@ -21,21 +21,42 @@ export default function RegisterPage() {
   
   const [districts, setDistricts] = useState([]);
   const [upazilas, setUpazilas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // ১. MongoDB থেকে ডিস্ট্রিক্ট লোড করা
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/districts')
       .then(res => res.json())
-      .then(data => setDistricts(data))
-      .catch(err => console.error("Error loading districts:", err));
+      .then(data => {
+        setDistricts(Array.isArray(data) ? data : []);
+      })
+      .catch(err => {
+        console.error("Error loading districts:", err);
+        setError("Failed to load districts. Is the server running?");
+      });
   }, []);
 
-  // ২. জেলা সিলেক্ট করলে উপজেলা লোড করা
+  // ২. জেলা সিলেক্ট করলে কালেকশনের 'district_id' অনুযায়ী উপজেলা লোড করা
   useEffect(() => {
     if (formData.district) {
-      fetch(`http://localhost:8000/api/v1/upazilas?districtId=${formData.district}`)
+      // জেলা পরিবর্তন হলে আগের সিলেক্ট করা উপজেলা রিসেট করা
+      setFormData(prev => ({ ...prev, upazila: '' }));
+
+      // ডাটাবেজের স্ট্রাকচার অনুযায়ী এখানে 'district_id' কুয়েরি ব্যবহার করা হয়েছে
+      fetch(`http://localhost:8000/api/v1/upazilas?district_id=${formData.district}`)
         .then(res => res.json())
-        .then(data => setUpazilas(data));
+        .then(data => {
+          console.log("Loaded upazilas from server:", data);
+          setUpazilas(Array.isArray(data) ? data : []);
+        })
+        .catch(err => {
+          console.error("Error loading upazilas:", err);
+          setUpazilas([]);
+        });
+    } else {
+      setUpazilas([]);
+      setFormData(prev => ({ ...prev, upazila: '' }));
     }
   }, [formData.district]);
 
@@ -46,34 +67,82 @@ export default function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError('');
+    
     if (formData.password !== formData.confirmPassword) {
       return alert("Password and Confirm Password do not match!");
     }
 
-    let imageUrl = "";
+    setLoading(true);
+    let imageUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150"; 
 
-    // ৩. ImageBB তে ইমেজ আপলোড
-    if (formData.image) {
-      const imageData = new FormData();
-      imageData.append("image", formData.image);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=YOUR_IMGBB_API_KEY`, {
-        method: "POST",
-        body: imageData
+    try {
+      // 📸 ৩. ImgBB তে ইমেজ আপলোড ট্রাই
+      if (formData.image) {
+        try {
+          const imageData = new FormData();
+          imageData.append("image", formData.image);
+          
+          const imgBBKey = '7d2a58b90c1f6d34e9e51b689a742cbb'; 
+          
+          const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgBBKey}`, {
+            method: "POST",
+            body: imageData
+          });
+          
+          const imgRes = await res.json();
+          
+          if (imgRes.success && imgRes.data && imgRes.data.url) {
+            imageUrl = imgRes.data.url;
+            console.log("Uploaded Image URL:", imageUrl);
+          } else {
+            console.warn("ImgBB Key Invalid, using fallback remote avatar image.");
+          }
+        } catch (imgErr) {
+          console.warn("ImgBB upload error ignored:", imgErr);
+        }
+      }
+
+      // ৪. আইডি থেকে জেলার আসল নাম বের করা (ব্যাকএন্ডে সেভ করার জন্য)
+      const selectedDistrictObj = districts.find(d => String(d.id) === String(formData.district) || String(d.district_id) === String(formData.district));
+      const districtName = selectedDistrictObj ? selectedDistrictObj.name : formData.district;
+
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        gender: formData.gender,
+        bloodGroup: formData.bloodGroup,
+        district: districtName, 
+        upazila: formData.upazila, 
+        password: formData.password,
+        avatar: imageUrl
+      };
+
+      console.log("Sending to backend:", userData);
+
+      // ৫. মঙ্গোডিবির রেজিস্ট্রেশন এপিআইতে ডাটা পাঠানো
+      const backendRes = await fetch('http://localhost:8000/api/v1/register', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(userData)
       });
-      const imgRes = await res.json();
-      imageUrl = imgRes.data.url;
+      
+      const backendData = await backendRes.json();
+
+      if (backendRes.ok || backendRes.status === 201) {
+        localStorage.setItem('token', backendData.token);
+        alert("Registration Successful!");
+        router.push('/'); 
+      } else {
+        setError(backendData.message || backendData.error || 'Registration failed (400). Check input requirements.');
+      }
+    } catch (err) {
+      console.error("Registration Error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    // ৪. Better Auth এ সাইনআপ
-    const { data, error } = await authClient.signUp.email({
-      email: formData.email,
-      password: formData.password,
-      name: formData.name,
-      // আপনার সার্ভারে যদি এক্সট্রা ফিল্ডের সাপোর্ট থাকে তবে এখানে পাঠাবেন
-    });
-
-    if (error) alert(error.message);
-    else alert("Registration Successful!");
   };
 
   return (
@@ -81,11 +150,13 @@ export default function RegisterPage() {
       <form onSubmit={handleRegister} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-lg border border-gray-100">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">Join as a Donor</h1>
         
+        {error && <p className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center font-medium mb-4">{error}</p>}
+
         {/* Image Upload */}
         <div className="flex justify-center mb-6">
-          <label className="cursor-pointer bg-gray-100 p-4 rounded-full border border-dashed border-gray-300 hover:bg-gray-200">
+          <label className="cursor-pointer bg-gray-100 p-4 rounded-full border border-dashed border-gray-300 hover:bg-gray-200 flex items-center justify-center w-20 h-20 overflow-hidden">
             {formData.image ? (
-              <img src={URL.createObjectURL(formData.image)} className="w-12 h-12 rounded-full object-cover" />
+              <img src={URL.createObjectURL(formData.image)} className="w-full h-full rounded-full object-cover" alt="Avatar Preview" />
             ) : (
               <FiCamera size={24} className="text-gray-500" />
             )}
@@ -94,60 +165,84 @@ export default function RegisterPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputGroup label="Full Name" name="name" icon={<FiUser />} onChange={handleInputChange} />
-          <InputGroup label="Email" name="email" type="email" icon={<FiMail />} onChange={handleInputChange} />
-          <InputGroup label="Phone" name="phone" icon={<FiPhone />} onChange={handleInputChange} />
+          <InputGroup label="Full Name" name="name" value={formData.name} icon={<FiUser />} onChange={handleInputChange} />
+          <InputGroup label="Email" name="email" type="email" value={formData.email} icon={<FiMail />} onChange={handleInputChange} />
+          <InputGroup label="Phone" name="phone" value={formData.phone} icon={<FiPhone />} onChange={handleInputChange} />
           
-          <SelectGroup label="Blood Group" name="bloodGroup" options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} onChange={handleInputChange} />
+          <SelectGroup label="Blood Group" name="bloodGroup" value={formData.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} onChange={handleInputChange} />
           
-          {/* Dynamic District */}
+          {/* 📍 Dynamic District */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">DISTRICT</label>
-            <select name="district" onChange={handleInputChange} className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-red-500">
+            <select 
+              name="district" 
+              value={formData.district} 
+              onChange={handleInputChange} 
+              required 
+              className="w-full border rounded-lg p-2.5 outline-none text-sm focus:ring-2 focus:ring-red-500 bg-white"
+            >
               <option value="">Select District</option>
-              {districts.map(d => <option key={d.district_id} value={d.district_id}>{d.name}</option>)}
+              {districts.map(d => {
+                // ডাটাবেজের 'id' ফিল্ড (যেমন: "3") ভ্যালু হিসেবে পাস হবে যা উপজেলার এপিআই-তে কুয়েরি করবে
+                const districtIdValue = d.id || d.district_id;
+                return (
+                  <option key={d._id || districtIdValue} value={districtIdValue}>
+                    {d.name}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
-          {/* Dynamic Upazila */}
+          {/* 📍 Dynamic Upazila */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">UPAZILA</label>
-            <select name="upazila" onChange={handleInputChange} disabled={!formData.district} className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-red-500">
+            <select 
+              name="upazila" 
+              value={formData.upazila} 
+              onChange={handleInputChange} 
+              disabled={!formData.district} 
+              required 
+              className="w-full border rounded-lg p-2.5 outline-none text-sm focus:ring-2 focus:ring-red-500 bg-white disabled:bg-gray-100"
+            >
               <option value="">Select Upazila</option>
-              {upazilas.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
+              {upazilas.map(u => (
+                <option key={u._id || u.id} value={u.name}>
+                  {u.name}
+                </option>
+              ))}
             </select>
           </div>
 
-          <InputGroup label="Password" name="password" type="password" icon={<FiLock />} onChange={handleInputChange} />
-          <InputGroup label="Confirm Password" name="confirmPassword" type="password" icon={<FiLock />} onChange={handleInputChange} />
+          <InputGroup label="Password" name="password" type="password" value={formData.password} icon={<FiLock />} onChange={handleInputChange} />
+          <InputGroup label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} icon={<FiLock />} onChange={handleInputChange} />
         </div>
 
-        <button type="submit" className="w-full mt-6 bg-red-700 text-white py-3 rounded-xl font-bold hover:bg-red-800 transition">
-          Complete Registration
+        <button type="submit" disabled={loading} className="w-full mt-6 bg-red-700 text-white py-3 rounded-xl font-bold hover:bg-red-800 transition disabled:bg-gray-400">
+          {loading ? 'Processing Registration...' : 'Complete Registration'}
         </button>
       </form>
     </div>
   );
 }
 
-// Helper Components
-function InputGroup({ label, name, icon, onChange, type = "text" }) {
+function InputGroup({ label, name, value, icon, onChange, type = "text" }) {
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">{label}</label>
-      <div className="flex items-center border rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-red-500">
+      <div className="flex items-center border rounded-lg px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-red-500">
         <span className="text-gray-400 mr-2">{icon}</span>
-        <input name={name} type={type} onChange={onChange} className="w-full outline-none text-sm" required />
+        <input name={name} type={type} value={value} onChange={onChange} className="w-full outline-none text-sm bg-transparent" required />
       </div>
     </div>
   );
 }
 
-function SelectGroup({ label, name, options, onChange }) {
+function SelectGroup({ label, name, value, options, onChange }) {
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">{label}</label>
-      <select name={name} onChange={onChange} className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-red-500 text-sm" required>
+      <select name={name} value={value} onChange={onChange} className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-red-500 text-sm bg-white" required>
         <option value="">Select {label}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>

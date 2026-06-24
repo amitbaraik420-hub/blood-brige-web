@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Droplet } from 'lucide-react';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -20,20 +22,33 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // TODO: পরের ধাপে এখানে আসল login call বসবে।
-      // উদাহরণ (JWT ভিত্তিক হলে):
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
-      // const data = await res.json();
-      // if (!res.ok) throw new Error(data.message);
-      // টোকেন সেভ + AuthContext আপডেট + redirect হবে এখানে
+      // 🟢 ব্যাকএন্ড লগইন এপিআই কল
+      const res = await fetch('http://localhost:8000/api/v1/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-      console.log('Login data:', formData);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || 'Invalid email or password');
+      }
+
+      // 🔑 টোকেন সেভ করা (রেজিস্ট্রেশন পেজের লজিকের সাথে মিল রেখে)
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      alert("Login Successful!");
+      
+      // 🚀 হোম পেজে রিডাইরেক্ট
+      router.push('/'); 
+      router.refresh();
+
     } catch (err) {
-      setError(err.message || 'লগইন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      console.error("Login Error:", err);
+      setError(err.message || 'लগইন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     } finally {
       setLoading(false);
     }
@@ -52,7 +67,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 text-center font-medium">
             {error}
           </div>
         )}
@@ -115,6 +130,7 @@ export default function LoginPage() {
         {/* Register link */}
         <p className="mt-6 text-center text-sm text-slate-500">
           অ্যাকাউন্ট নেই?{' '}
+          {/* আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী লিঙ্কের বানান ঠিক রাখা হয়েছে */}
           <Link href="/regester" className="font-semibold text-rose-600 hover:underline">
             Register করুন
           </Link>
