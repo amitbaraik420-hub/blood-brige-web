@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // 🔄 পেজ লোড হলে ইউজারের প্রোফাইল ডাটা ব্যাকএন্ড থেকে আনা
+  
   const fetchUserProfile = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      // এখানে আপনার ব্যাকএন্ডের প্রোফাইল বা 'me' এপিআই কল হবে
+     
       const res = await fetch('http://localhost:8000/api/v1/profile', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -29,9 +29,9 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         const data = await res.json();
-        setUser(data); // ব্যাকএন্ড থেকে আসা ইউজার অবজেক্ট সেট হবে
+        setUser(data);
       } else {
-        // টোকেন ইনভ্যালিড হলে রিমুভ করে দেওয়া
+      
         localStorage.removeItem('token');
         setUser(null);
       }
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
     fetchUserProfile();
   }, []);
 
-  // 🚪 লগআউট ফাংশন (গ্লোবাল)
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);

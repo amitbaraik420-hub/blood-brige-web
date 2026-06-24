@@ -7,7 +7,7 @@ export default function HomePage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ব্যাকএন্ড থেকে সব রিকোয়েস্ট ফেচ করা
+ 
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/donation-requests')
       .then((res) => res.json())
@@ -25,7 +25,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         
-        {/* হিরো বা ব্যানার সেকশন */}
+       
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-slate-800 sm:text-5xl">
             Saves Lives, <span className="text-rose-600">Donate Blood</span>
@@ -35,7 +35,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* 🩸 রক্তের অনুরোধের ফিড */}
+        
         <div>
           <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
             <span className="inline-block h-4 w-1 bg-rose-600 rounded-full"></span>
@@ -51,14 +51,14 @@ export default function HomePage() {
               {requests.map((request) => (
                 <div key={request._id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
                   
-                  {/* ব্লাড গ্রুপ ব্যাজ */}
+                  
                   <div className="absolute top-0 right-0 bg-rose-50 text-rose-600 font-black text-xl px-4 py-2 rounded-bl-2xl border-l border-b border-rose-100 flex items-center gap-1">
                     <Droplet className="w-5 h-5 fill-rose-600 animate-pulse" />
                     {request.bloodGroup}
                   </div>
 
                   <div>
-                    {/* রোগী ও আবেদনকারীর নাম */}
+                 
                     <div className="mb-4">
                       <h3 className="text-lg font-bold text-slate-800 capitalize leading-tight pr-12">
                         Patient: {request.recipientName}
@@ -68,7 +68,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    {/* বিস্তারিত তথ্য */}
+                   
                     <div className="space-y-2 text-sm text-slate-600">
                       <div className="flex items-start gap-2">
                         <Hospital className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
@@ -93,7 +93,7 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* অ্যাকশন বাটন */}
+                  
                   <div className="mt-5 pt-4 border-t border-slate-100">
                     <button 
                       onClick={() => alert(`Contact Email: ${request.requesterEmail}`)}

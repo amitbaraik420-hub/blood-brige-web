@@ -36,7 +36,7 @@ export default function GettingStarted() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-6">
         {steps.map((step, index) => (
           <div key={index} className="flex flex-col items-center">
-            {/* Step Number Badge */}
+           
             <div className="relative mb-6">
               <div className="p-5 bg-gray-50 rounded-full text-red-600">
                 <step.icon size={24} />

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { MdOutlineDashboard } from 'react-icons/md';
 import { CiLogin } from 'react-icons/ci';
-import { useAuth } from '@/context/AuthContext'; // 👈 AuthContext ইম্পোর্ট
+import { useAuth } from '@/context/AuthContext';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -38,7 +38,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop links */}
+      
         <ul className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -49,10 +49,10 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* Right side (desktop) */}
+        
         <div className="hidden items-center gap-3 md:flex">
           {!user ? (
-            /* 🔴 লগইন না থাকলে */
+          
             <Link
               href="/login"
               className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
@@ -60,7 +60,7 @@ export default function Navbar() {
               Login
             </Link>
           ) : (
-            /* 🟢 লগইন থাকলে ডাইনামিক ডাটা */
+            
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full">
@@ -91,7 +91,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile menu toggle */}
+        
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-slate-700 md:hidden"
@@ -101,7 +101,7 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile menu */}
+    
       {isOpen && (
         <div className="space-y-4 border-t border-rose-100 bg-white px-4 py-4 md:hidden">
           <div className="space-y-3">
@@ -121,7 +121,7 @@ export default function Navbar() {
 
           <div className="pt-1">
             {user ? (
-              /* 🟢 মোবাইল মোডে লগইন থাকলে */
+           
               <div className="dropdown dropdown-end w-full">
                 <div tabIndex={0} role="button" className="flex items-center gap-3 w-full p-2 hover:bg-slate-50 rounded-lg transition-colors">
                   <div className="avatar">
@@ -151,7 +151,7 @@ export default function Navbar() {
                 </ul>
               </div>
             ) : (
-              /* 🔴 মোবাইল মোডে লগইন না থাকলে */
+              
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}

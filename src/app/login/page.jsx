@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // 🟢 ব্যাকএন্ড লগইন এপিআই কল
+   
       const res = await fetch('http://localhost:8000/api/v1/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,14 +35,14 @@ export default function LoginPage() {
         throw new Error(data.message || data.error || 'Invalid email or password');
       }
 
-      // 🔑 টোকেন সেভ করা (রেজিস্ট্রেশন পেজের লজিকের সাথে মিল রেখে)
+     
       if (data.token) {
         localStorage.setItem('token', data.token);
       }
 
       alert("Login Successful!");
       
-      // 🚀 হোম পেজে রিডাইরেক্ট
+      
       router.push('/'); 
       router.refresh();
 
@@ -73,7 +73,7 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
+         
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               Email
@@ -90,7 +90,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
+        
           <div>
             <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">
               Password
@@ -117,7 +117,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Submit */}
+         
           <button
             type="submit"
             disabled={loading}
@@ -127,10 +127,10 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Register link */}
+        
         <p className="mt-6 text-center text-sm text-slate-500">
           অ্যাকাউন্ট নেই?{' '}
-          {/* আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী লিঙ্কের বানান ঠিক রাখা হয়েছে */}
+        
           <Link href="/regester" className="font-semibold text-rose-600 hover:underline">
             Register করুন
           </Link>

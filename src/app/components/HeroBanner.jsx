@@ -3,13 +3,13 @@ import { IoIosPeople } from "react-icons/io";
 export default function HeroBanner() {
   return (
     <div className="relative w-full overflow-hidden rounded-3xl bg-gray-900 text-white">
-      {/* Background Image Container */}
+    
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: "url('/your-image.jpg')" }} // Add your image to public folder
+        style={{ backgroundImage: "url('/your-image.jpg')" }}
       />
       
-      {/* Content */}
+     
       <div className="relative z-10 flex flex-col items-center justify-center py-24 px-4 text-center">
         <div className="mb-6 rounded-full bg-white/10 px-4 py-1 text-sm backdrop-blur-md">
           📍 Trusted by 15+ Local Heroes
@@ -34,7 +34,7 @@ export default function HeroBanner() {
         </div>
       </div>
 
-      {/* Stat Cards Container */}
+    
       <div className="relative z-10 -mt-16 flex justify-center gap-6 px-4 pb-12">
         <StatCard label="ACTIVE DONORS" value="15+" />
         <StatCard label="TOTAL FUNDING" value="$25,312" />

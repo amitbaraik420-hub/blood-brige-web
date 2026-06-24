@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ১. MongoDB থেকে ডিস্ট্রিক্ট লোড করা
+ 
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/districts')
       .then(res => res.json())
@@ -37,13 +37,13 @@ export default function RegisterPage() {
       });
   }, []);
 
-  // ২. জেলা সিলেক্ট করলে কালেকশনের 'district_id' অনুযায়ী উপজেলা লোড করা
+ 
   useEffect(() => {
     if (formData.district) {
-      // জেলা পরিবর্তন হলে আগের সিলেক্ট করা উপজেলা রিসেট করা
+     
       setFormData(prev => ({ ...prev, upazila: '' }));
 
-      // ডাটাবেজের স্ট্রাকচার অনুযায়ী এখানে 'district_id' কুয়েরি ব্যবহার করা হয়েছে
+     
       fetch(`http://localhost:8000/api/v1/upazilas?district_id=${formData.district}`)
         .then(res => res.json())
         .then(data => {
@@ -77,7 +77,7 @@ export default function RegisterPage() {
     let imageUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150"; 
 
     try {
-      // 📸 ৩. ImgBB তে ইমেজ আপলোড ট্রাই
+      
       if (formData.image) {
         try {
           const imageData = new FormData();
@@ -103,7 +103,7 @@ export default function RegisterPage() {
         }
       }
 
-      // ৪. আইডি থেকে জেলার আসল নাম বের করা (ব্যাকএন্ডে সেভ করার জন্য)
+  
       const selectedDistrictObj = districts.find(d => String(d.id) === String(formData.district) || String(d.district_id) === String(formData.district));
       const districtName = selectedDistrictObj ? selectedDistrictObj.name : formData.district;
 
@@ -121,7 +121,7 @@ export default function RegisterPage() {
 
       console.log("Sending to backend:", userData);
 
-      // ৫. মঙ্গোডিবির রেজিস্ট্রেশন এপিআইতে ডাটা পাঠানো
+   
       const backendRes = await fetch('http://localhost:8000/api/v1/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -152,7 +152,7 @@ export default function RegisterPage() {
         
         {error && <p className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center font-medium mb-4">{error}</p>}
 
-        {/* Image Upload */}
+       
         <div className="flex justify-center mb-6">
           <label className="cursor-pointer bg-gray-100 p-4 rounded-full border border-dashed border-gray-300 hover:bg-gray-200 flex items-center justify-center w-20 h-20 overflow-hidden">
             {formData.image ? (
@@ -171,7 +171,7 @@ export default function RegisterPage() {
           
           <SelectGroup label="Blood Group" name="bloodGroup" value={formData.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} onChange={handleInputChange} />
           
-          {/* 📍 Dynamic District */}
+         
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">DISTRICT</label>
             <select 
@@ -183,7 +183,7 @@ export default function RegisterPage() {
             >
               <option value="">Select District</option>
               {districts.map(d => {
-                // ডাটাবেজের 'id' ফিল্ড (যেমন: "3") ভ্যালু হিসেবে পাস হবে যা উপজেলার এপিআই-তে কুয়েরি করবে
+               
                 const districtIdValue = d.id || d.district_id;
                 return (
                   <option key={d._id || districtIdValue} value={districtIdValue}>
@@ -194,7 +194,7 @@ export default function RegisterPage() {
             </select>
           </div>
 
-          {/* 📍 Dynamic Upazila */}
+       
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">UPAZILA</label>
             <select 

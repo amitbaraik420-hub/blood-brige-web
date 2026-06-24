@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function SearchDonorPage() {
   const [bloodGroup, setBloodGroup] = useState('');
-  const [district, setDistrict] = useState(''); // এখানে আমরা সিলেক্টেড জেলার district_id সেভ রাখবো
+  const [district, setDistrict] = useState('');
   const [upazila, setUpazila] = useState('');
   
   const [districts, setDistricts] = useState([]);
@@ -14,7 +14,7 @@ export default function SearchDonorPage() {
 
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  // ১. পেজ লোড হলে ব্যাকএন্ড থেকে জেলা (Districts) লোড করা
+ 
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/districts')
       .then((res) => res.json())
@@ -22,26 +22,25 @@ export default function SearchDonorPage() {
       .catch((err) => console.error('Error fetching districts:', err));
   }, []);
 
-  // ২. জেলা সিলেক্ট করলে সেই জেলার district_id দিয়ে উপজেলা (Upazilas) লোড করা
+
   useEffect(() => {
     if (!district) {
       setUpazilas([]);
       return;
     }
-    // ব্যাকএন্ডের এপিআই কুয়েরি অনুযায়ী districtId পাস করা হচ্ছে
+   
     fetch(`http://localhost:8000/api/v1/upazilas?districtId=${district}`)
       .then((res) => res.json())
       .then((data) => setUpazilas(data))
       .catch((err) => console.error('Error fetching upazilas:', err));
   }, [district]);
 
-  // ৩. সার্চ হ্যান্ডলার ফাংশন
+
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // ব্যাকএন্ডে ইউজার খোঁজার জন্য আমাদের জেলার নাম (যেমন: Comilla) পাঠাতে হবে।
-    // তাই district_id দিয়ে districts অ্যারে থেকে সঠিক জেলার অবজেক্টটি খুঁজে তার নাম নেওয়া হলো।
+   
     const selectedDistrictObj = districts.find(d => d.district_id === district);
     const districtName = selectedDistrictObj ? selectedDistrictObj.name : '';
 
@@ -65,7 +64,7 @@ export default function SearchDonorPage() {
           Find a <span className="text-rose-600">Blood Donor</span>
         </h1>
 
-        {/* 🔍 সার্চ ফিল্টার ফর্ম */}
+   
         <form onSubmit={handleSearch} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-10">
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">Blood Group</label>
@@ -92,7 +91,7 @@ export default function SearchDonorPage() {
             >
               <option value="">Select District</option>
               {districts.map((d, index) => (
-                // 🟢 key ইউনিক করার জন্য ইন্ডেক্স এবং আইডি একসাথে কম্বাইন করে দেওয়া হলো
+               
                 <option key={`district-${d.id}-${index}`} value={d.district_id}>
                   {d.bn_name} ({d.name})
                 </option>
@@ -111,7 +110,7 @@ export default function SearchDonorPage() {
             >
               <option value="">Select Upazila</option>
               {upazilas.map((u, index) => (
-                // 🟢 key ইউনিক করার জন্য ইন্ডেক্স এবং আইডি একসাথে কম্বাইন করে দেওয়া হলো
+               
                 <option key={`upazila-${u.id}-${index}`} value={u.name}>
                   {u.bn_name} ({u.name})
                 </option>
@@ -127,7 +126,7 @@ export default function SearchDonorPage() {
           </button>
         </form>
 
-        {/* 👥 ডোনারদের রেজাল্ট লিস্ট */}
+        
         <div>
           <h2 className="text-xl font-bold text-slate-700 mb-4">Search Results ({donors.length})</h2>
           

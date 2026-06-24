@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           
-          {/* ব্র্যান্ড সেকশন */}
+       
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 text-white">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 text-lg font-bold">🩸</span>
@@ -26,7 +26,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* লিঙ্ক সেকশনসমূহ (Map ফাংশন ব্যবহার করে ক্লিন কোড) */}
+         
           {[ 
             { title: "Quick Links", links: [{name: 'Home', href: '/'}, {name: 'Donation Requests', href: '/donation-requests'}, {name: 'Search Donors', href: '/search'}, {name: 'Login', href: '/login'}] },
             { title: "Resources", links: [{name: 'About Us', href: '/about'}, {name: 'How It Works', href: '/#how-it-works'}, {name: 'Funding', href: '/funding'}, {name: 'Contact', href: '/#contact'}] }
@@ -43,7 +43,7 @@ const Footer = () => {
             </div>
           ))}
 
-          {/* যোগাযোগ সেকশন */}
+        
           <div>
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Contact Us</h3>
             <ul className="mt-6 space-y-4 text-sm">

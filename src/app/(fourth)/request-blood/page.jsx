@@ -9,12 +9,12 @@ export default function RequestBloodPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  // ফর্ম স্টেটসমূহ
+
   const [recipientName, setRecipientName] = useState('');
   const [hospitalName, setHospitalName] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
-  const [district, setDistrict] = useState(''); // এখানে district_id থাকবে ড্রপডাউনের জন্য
+  const [district, setDistrict] = useState('');
   const [upazila, setUpazila] = useState('');
   const [donationDate, setDonationDate] = useState('');
   const [donationTime, setDonationTime] = useState('');
@@ -25,14 +25,14 @@ export default function RequestBloodPage() {
 
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  // যদি লগইন না থাকে তবে লগইন পেজে রিডাইরেক্ট করা
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
 
-  // ১. জেলাসমূহ (Districts) লোড করা
+  
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/districts')
       .then((res) => res.json())
@@ -40,7 +40,6 @@ export default function RequestBloodPage() {
       .catch((err) => console.error('Error fetching districts:', err));
   }, []);
 
-  // ২. জেলা সিলেক্ট হলে উপজেলা (Upazilas) লোড করা
   useEffect(() => {
     if (!district) {
       setUpazilas([]);
@@ -52,12 +51,12 @@ export default function RequestBloodPage() {
       .catch((err) => console.error('Error fetching upazilas:', err));
   }, [district]);
 
-  // ৩. ফর্ম সাবমিট হ্যান্ডলার
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
 
-    // district_id থেকে ডিস্ট্রিক্টের আসল নাম (যেমন: Comilla) বের করা
+   
     const selectedDistrictObj = districts.find((d) => d.district_id === district);
     const districtName = selectedDistrictObj ? selectedDistrictObj.name : '';
 
@@ -75,7 +74,7 @@ export default function RequestBloodPage() {
     };
 
     try {
-      const token = localStorage.getItem('token'); // অথবা আপনার যেভাবে টোকেন স্টোর করা আছে
+      const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:8000/api/v1/donation-requests', {
         method: 'POST',
         headers: {
@@ -87,7 +86,7 @@ export default function RequestBloodPage() {
 
       if (res.ok) {
         alert('🟢 রক্তের অনুরোধটি সফলভাবে পোস্ট করা হয়েছে!');
-        // ফর্ম রিসেট করা
+      
         setRecipientName('');
         setHospitalName('');
         setFullAddress('');
@@ -97,7 +96,7 @@ export default function RequestBloodPage() {
         setDonationDate('');
         setDonationTime('');
         
-        // রিকোয়েস্ট সফল হলে হোম পেজ বা ড্যাশবোর্ডে পাঠানো যেতে পারে
+      
         router.push('/');
       } else {
         const errData = await res.json();
@@ -105,7 +104,7 @@ export default function RequestBloodPage() {
       }
     } catch (error) {
       console.error('Error creating donation request:', error);
-      alert('❌ সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না!');
+      alert('Can not connect to with server. Please try again later.');
     } finally {
       setSubmitLoading(false);
     }
@@ -129,7 +128,7 @@ export default function RequestBloodPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* ১. আবেদনকারীর তথ্য (অটো-ফিল্ড) */}
+         
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Requester Name</label>
@@ -141,7 +140,7 @@ export default function RequestBloodPage() {
             </div>
           </div>
 
-          {/* ২. রোগীর ও হাসপাতালের বিবরণ */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-2">Recipient Name (রোগীর নাম)</label>
@@ -153,7 +152,7 @@ export default function RequestBloodPage() {
             </div>
           </div>
 
-          {/* ৩. ব্লাড গ্রুপ ও পুরো ঠিকানা */}
+         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-2">Required Blood Group</label>
@@ -168,7 +167,7 @@ export default function RequestBloodPage() {
             </div>
           </div>
 
-          {/* ৪. জেলা ও উপজেলা ড্রপডাউন */}
+        
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-2">District (জেলা)</label>
@@ -190,7 +189,7 @@ export default function RequestBloodPage() {
             </div>
           </div>
 
-          {/* ৫. রক্তদানের তারিখ ও সময় */}
+       
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-2">Donation Date (তারিখ)</label>
@@ -202,7 +201,7 @@ export default function RequestBloodPage() {
             </div>
           </div>
 
-          {/* সাবমিট বাটন */}
+          
           <div className="pt-4">
             <button type="submit" disabled={submitLoading} className="btn bg-rose-600 hover:bg-rose-700 text-white font-semibold border-none rounded-xl w-full h-[3rem]">
               {submitLoading ? 'Posting Request...' : 'Submit Blood Request'}
