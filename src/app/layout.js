@@ -4,6 +4,7 @@ import Navbar from "./navbar/page";
 import Footer from "./components/Footer";
 import HeroBanner from "./components/HeroBanner";
 import GettingStarted from "./GettingStarted/page";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,11 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
        
-     
-        {children}
+      <AuthProvider>
+            {children}
+
+      </AuthProvider>
+        
 
     
       </body>
