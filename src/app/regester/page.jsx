@@ -24,10 +24,13 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
- 
+  // 🟢 ১. ডিস্ট্রিক্ট লোড করার ইফেক্ট
   useEffect(() => {
     fetch('https://server-site-rose.vercel.app/api/v1/districts')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch districts');
+        return res.json();
+      })
       .then(data => {
         setDistricts(Array.isArray(data) ? data : []);
       })
@@ -37,15 +40,17 @@ export default function RegisterPage() {
       });
   }, []);
 
- 
+  // 🟢 ২. উপজেলা লোড করার ইফেক্ট (districtId কুয়েরি প্যারামিটার ফিক্স করা হয়েছে)
   useEffect(() => {
     if (formData.district) {
-     
       setFormData(prev => ({ ...prev, upazila: '' }));
 
-     
-      fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?district_id=${formData.district}`)
-        .then(res => res.json())
+      // ব্যাকএন্ডের req.query.districtId এর সাথে মিল রেখে districtId করা হলো
+      fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?districtId=${formData.district}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch upazilas');
+          return res.json();
+        })
         .then(data => {
           console.log("Loaded upazilas from server:", data);
           setUpazilas(Array.isArray(data) ? data : []);
@@ -77,7 +82,6 @@ export default function RegisterPage() {
     let imageUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150"; 
 
     try {
-      
       if (formData.image) {
         try {
           const imageData = new FormData();
@@ -103,7 +107,6 @@ export default function RegisterPage() {
         }
       }
 
-  
       const selectedDistrictObj = districts.find(d => String(d.id) === String(formData.district) || String(d.district_id) === String(formData.district));
       const districtName = selectedDistrictObj ? selectedDistrictObj.name : formData.district;
 
@@ -121,7 +124,6 @@ export default function RegisterPage() {
 
       console.log("Sending to backend:", userData);
 
-   
       const backendRes = await fetch('https://server-site-rose.vercel.app/api/v1/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -139,7 +141,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       console.error("Registration Error:", err);
-      setError(err.message);
+      setError(err.message || 'Something went wrong during registration.');
     } finally {
       setLoading(false);
     }
@@ -152,7 +154,6 @@ export default function RegisterPage() {
         
         {error && <p className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center font-medium mb-4">{error}</p>}
 
-       
         <div className="flex justify-center mb-6">
           <label className="cursor-pointer bg-gray-100 p-4 rounded-full border border-dashed border-gray-300 hover:bg-gray-200 flex items-center justify-center w-20 h-20 overflow-hidden">
             {formData.image ? (
@@ -160,7 +161,7 @@ export default function RegisterPage() {
             ) : (
               <FiCamera size={24} className="text-gray-500" />
             )}
-            <input type="file" className="hidden" onChange={(e) => setFormData({...formData, image: e.target.files[0]})} />
+            <input type="file" className="hidden" onChange={(e) => setFormData({...formData, image: e.target.files[0] ? e.target.files[0] : null})} />
           </label>
         </div>
 
@@ -171,7 +172,6 @@ export default function RegisterPage() {
           
           <SelectGroup label="Blood Group" name="bloodGroup" value={formData.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} onChange={handleInputChange} />
           
-         
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">DISTRICT</label>
             <select 
@@ -183,7 +183,6 @@ export default function RegisterPage() {
             >
               <option value="">Select District</option>
               {districts.map(d => {
-               
                 const districtIdValue = d.id || d.district_id;
                 return (
                   <option key={d._id || districtIdValue} value={districtIdValue}>
@@ -194,7 +193,6 @@ export default function RegisterPage() {
             </select>
           </div>
 
-       
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">UPAZILA</label>
             <select 
