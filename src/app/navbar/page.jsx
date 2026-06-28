@@ -18,15 +18,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading, logout } = useAuth(); 
 
-  if (loading) {
-    return (
-      <header className="sticky top-0 z-50 border-b border-rose-100 bg-white px-4 h-16 flex items-center justify-between">
-        <span className="text-xl font-bold text-slate-800">Life<span className="text-rose-600">Drop</span></span>
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-rose-600 border-t-transparent"></div>
-      </header>
-    );
-  }
-
   return (
     <header className="sticky top-0 z-50 border-b border-rose-100 bg-white/90 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -38,7 +29,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-      
+        {/* Desktop Links */}
         <ul className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -49,10 +40,12 @@ export default function Navbar() {
           ))}
         </ul>
 
-        
+        {/* Desktop User/Auth Profile */}
         <div className="hidden items-center gap-3 md:flex">
-          {!user ? (
-          
+          {loading ? (
+            // 🟢 লোডিং অবস্থায় পুরো নেভবার হাইড না করে শুধু এখানে একটা ছোট স্পিনার দেখাবে
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-rose-600 border-t-transparent"></div>
+          ) : !user ? (
             <Link
               href="/login"
               className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
@@ -60,7 +53,6 @@ export default function Navbar() {
               Login
             </Link>
           ) : (
-            
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full">
@@ -91,7 +83,7 @@ export default function Navbar() {
           )}
         </div>
 
-        
+        {/* Mobile Hamburger Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-slate-700 md:hidden"
@@ -101,7 +93,7 @@ export default function Navbar() {
         </button>
       </nav>
 
-    
+      {/* Mobile Drawer Links */}
       {isOpen && (
         <div className="space-y-4 border-t border-rose-100 bg-white px-4 py-4 md:hidden">
           <div className="space-y-3">
@@ -120,8 +112,11 @@ export default function Navbar() {
           <hr className="border-rose-50" />
 
           <div className="pt-1">
-            {user ? (
-           
+            {loading ? (
+              <div className="flex justify-center py-2">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-rose-600 border-t-transparent"></div>
+              </div>
+            ) : user ? (
               <div className="dropdown dropdown-end w-full">
                 <div tabIndex={0} role="button" className="flex items-center gap-3 w-full p-2 hover:bg-slate-50 rounded-lg transition-colors">
                   <div className="avatar">
@@ -151,7 +146,6 @@ export default function Navbar() {
                 </ul>
               </div>
             ) : (
-              
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
