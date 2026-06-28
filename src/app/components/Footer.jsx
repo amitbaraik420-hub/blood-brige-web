@@ -28,8 +28,8 @@ const Footer = () => {
 
          
           {[ 
-            { title: "Quick Links", links: [{name: 'Home', href: '/'}, {name: 'Donation Requests', href: '/donation-requests'}, {name: 'Search Donors', href: '/search'}, {name: 'Login', href: '/login'}] },
-            { title: "Resources", links: [{name: 'About Us', href: '/about'}, {name: 'How It Works', href: '/#how-it-works'}, {name: 'Funding', href: '/funding'}, {name: 'Contact', href: '/#contact'}] }
+            { title: "Quick Links", links: [{name: 'Home', href: '/'}, {name: 'Profile', href: '/donation-requests'}, {name: 'Search Donors', href: '/search-donor'}, {name: 'Login', href: '/login'}] },
+            { title: "Resources", links: [{name: 'About Us', href: '/#about'}, {name: 'How It Works', href: '/#how-it-works'}, {name: 'Funding', href: '/#funding'}, {name: 'Contact', href: '/#contact'}] }
           ].map((section, idx) => (
             <div key={idx}>
               <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{section.title}</h3>
