@@ -36,24 +36,20 @@ export default function RegisterPage() {
       })
       .catch(err => {
         console.error("Error loading districts:", err);
-        setError("Failed to load districts. Is the server running?");
+        setError("Failed to load districts. Please check internet connection or server status.");
       });
   }, []);
 
   // 🟢 ২. সিলেক্টেড ডিস্ট্রিক্টের ওপর ভিত্তি করে ডাটাবেজ (MongoDB) থেকে উপজেলা লোড করা
   useEffect(() => {
     if (formData.district) {
-      // ডিস্ট্রিক্ট চেঞ্জ হলে আগের সিলেক্ট করা উপজেলা রিসেট হবে
-      setFormData(prev => ({ ...prev, upazila: '' }));
-
-      // ব্যাকএন্ডের সাথে মিল রেখে districtId কুয়েরি প্যারামিটার পাঠানো হচ্ছে
+      // ব্যাকএন্ডের সাথে মিল রেখে districtId কুয়েরি প্যারামিটার পাঠানো হচ্ছে
       fetch(`https://server-site-rose.vercel.app/api/v1/upazilas?districtId=${formData.district}`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch upazilas');
           return res.json();
         })
         .then(data => {
-          console.log("Loaded upazilas from MongoDB:", data);
           setUpazilas(Array.isArray(data) ? data : []);
         })
         .catch(err => {
@@ -62,13 +58,18 @@ export default function RegisterPage() {
         });
     } else {
       setUpazilas([]);
-      setFormData(prev => ({ ...prev, upazila: '' }));
     }
   }, [formData.district]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'district') {
+      // ডিস্ট্রিক্ট চেঞ্জ হলে উপজেলা স্টেট রিসেট করতে হবে বাধ্যতামূলক
+      setFormData(prev => ({ ...prev, district: value, upazila: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleRegister = async (e) => {
@@ -80,6 +81,7 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
+    // Fallback ডিফল্ট অবতার ইমেজ
     let imageUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150"; 
 
     try {
@@ -89,7 +91,8 @@ export default function RegisterPage() {
           const imageData = new FormData();
           imageData.append("image", formData.image);
           
-          const imgBBKey = '7d2a58b90c1f6d34e9e51b689a742cbb'; 
+          // env ফাইল থেকে কি জোড়া হলো, না থাকলে হার্ডকোড ব্যাকআপ কাজ করবে
+          const imgBBKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || '7d2a58b90c1f6d34e9e51b689a742cbb'; 
           
           const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgBBKey}`, {
             method: "POST",
@@ -100,7 +103,6 @@ export default function RegisterPage() {
           
           if (imgRes.success && imgRes.data && imgRes.data.url) {
             imageUrl = imgRes.data.url;
-            console.log("Uploaded Image URL:", imageUrl);
           } else {
             console.warn("ImgBB Key Invalid, using fallback remote avatar image.");
           }
@@ -109,9 +111,17 @@ export default function RegisterPage() {
         }
       }
 
-      // 🟢 ৪. সাবমিট করার সময় ডিস্ট্রিক্ট ID থেকে ডিস্ট্রিক্টের নাম (Name) বের করা
+      // 🟢 ৪. ডাটাবেজে স্টোর করার আগে নামের ফরম্যাট সার্চ পেজের সাথে মিলানো (যেমন: Dhaka, Sylhet)
       const selectedDistrictObj = districts.find(d => String(d.id) === String(formData.district) || String(d.district_id) === String(formData.district));
-      const districtName = selectedDistrictObj ? selectedDistrictObj.name : formData.district;
+      let districtName = selectedDistrictObj ? selectedDistrictObj.name : formData.district;
+      if (districtName) {
+        districtName = districtName.charAt(0).toUpperCase() + districtName.slice(1).toLowerCase();
+      }
+
+      let upazilaName = formData.upazila;
+      if (upazilaName) {
+        upazilaName = upazilaName.charAt(0).toUpperCase() + upazilaName.slice(1).toLowerCase();
+      }
 
       const userData = {
         name: formData.name,
@@ -119,15 +129,17 @@ export default function RegisterPage() {
         phone: formData.phone,
         gender: formData.gender,
         bloodGroup: formData.bloodGroup,
-        district: districtName, // ডাটাবেজে নাম (String) সেভ হবে
-        upazila: formData.upazila,   // ডাটাবেজে নাম (String) সেভ হবে
+        district: districtName, 
+        upazila: upazilaName,   
         password: formData.password,
-        avatar: imageUrl
+        avatar: imageUrl,
+        role: 'donor',   // ডিফল্ট রোল এসাইনমেন্ট
+        status: 'active' // ডিফল্ট স্ট্যাটাস এসাইনমেন্ট
       };
 
       console.log("Sending to backend:", userData);
 
-      // 🟢 ৫. ব্যাকএন্ডে রেজিস্ট্রেশন রিকোয়েস্ট পাঠানো
+      // 🟢 ৫. ব্যাকএন্ডে রেজিস্ট্রেশন রিকোয়েস্ট পাঠানো
       const backendRes = await fetch('https://server-site-rose.vercel.app/api/v1/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -137,11 +149,13 @@ export default function RegisterPage() {
       const backendData = await backendRes.json();
 
       if (backendRes.ok || backendRes.status === 201) {
-        localStorage.setItem('token', backendData.token);
+        if (backendData.token) {
+          localStorage.setItem('token', backendData.token);
+        }
         alert("Registration Successful!");
         router.push('/'); 
       } else {
-        setError(backendData.message || backendData.error || 'Registration failed (400). Check input requirements.');
+        setError(backendData.message || backendData.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
       console.error("Registration Error:", err);
@@ -166,13 +180,16 @@ export default function RegisterPage() {
             ) : (
               <FiCamera size={24} className="text-gray-500" />
             )}
-            <input type="file" className="hidden" onChange={(e) => setFormData({...formData, image: e.target.files[0] ? e.target.files[0] : null})} />
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => setFormData({...formData, image: e.target.files[0] ? e.target.files[0] : null})} />
           </label>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputGroup label="Full Name" name="name" value={formData.name} icon={<FiUser />} onChange={handleInputChange} />
+          
+          {/* 🔥 এখানে onChange={handleInputChange} যোগ করে এররটি ফিক্স করা হয়েছে */}
           <InputGroup label="Email" name="email" type="email" value={formData.email} icon={<FiMail />} onChange={handleInputChange} />
+          
           <InputGroup label="Phone" name="phone" value={formData.phone} icon={<FiPhone />} onChange={handleInputChange} />
           
           <SelectGroup label="Blood Group" name="bloodGroup" value={formData.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} onChange={handleInputChange} />
@@ -189,7 +206,7 @@ export default function RegisterPage() {
             >
               <option value="">Select District</option>
               {districts.map(d => {
-                const districtIdValue = d.id || d.district_id;
+                const districtIdValue = d.district_id || d.id;
                 return (
                   <option key={d._id || districtIdValue} value={districtIdValue}>
                     {d.name}
@@ -212,7 +229,7 @@ export default function RegisterPage() {
             >
               <option value="">Select Upazila</option>
               {upazilas.map(u => {
-                const upazilaIdValue = u.id || u.upazila_id || u._id;
+                const upazilaIdValue = u.upazila_id || u.id || u._id;
                 return (
                   <option key={upazilaIdValue} value={u.name}>
                     {u.name}
@@ -234,7 +251,6 @@ export default function RegisterPage() {
   );
 }
 
-// 🟢 কম্পোনেন্ট দুটি নিচে মাত্র একবার ইউনিকভাবে রাখা হলো
 function InputGroup({ label, name, value, icon, onChange, type = "text" }) {
   return (
     <div>

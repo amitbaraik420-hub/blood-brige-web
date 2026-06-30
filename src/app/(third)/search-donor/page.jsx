@@ -11,11 +11,10 @@ export default function SearchDonorPage() {
   const [upazilas, setUpazilas] = useState([]);
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false); // 🔥 নতুন স্টেট: সার্চ করা হয়েছে কিনা ট্র্যাক করার জন্য
 
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  // Fetch Districts
+ 
   useEffect(() => {
     fetch('https://server-site-rose.vercel.app/api/v1/districts')
       .then((res) => res.json())
@@ -23,7 +22,7 @@ export default function SearchDonorPage() {
       .catch((err) => console.error('Error fetching districts:', err));
   }, []);
 
-  // Fetch Upazilas based on District ID
+
   useEffect(() => {
     if (!district) {
       setUpazilas([]);
@@ -36,28 +35,18 @@ export default function SearchDonorPage() {
       .catch((err) => console.error('Error fetching upazilas:', err));
   }, [district]);
 
+
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSearched(true); // 🔥 সার্চ বাটন ক্লিক হলেই এটি true হবে
 
-    // অবজেক্ট থেকে ডিস্ট্রিক্টের ইংলিশ নাম বের করা
+   
     const selectedDistrictObj = districts.find(d => d.district_id === district);
-    let districtName = selectedDistrictObj ? selectedDistrictObj.name : '';
-    
-    // সেফটি চেক: কেস-সেন্সিটিভিটি ইস্যু এড়াতে Capitalize করা (যেমন: SYLHET -> Sylhet)
-    if (districtName) {
-      districtName = districtName.charAt(0).toUpperCase() + districtName.slice(1).toLowerCase();
-    }
-
-    let upazilaName = upazila;
-    if (upazilaName) {
-      upazilaName = upazilaName.charAt(0).toUpperCase() + upazilaName.slice(1).toLowerCase();
-    }
+    const districtName = selectedDistrictObj ? selectedDistrictObj.name : '';
 
     try {
       const res = await fetch(
-        `https://server-site-rose.vercel.app/api/v1/donors/search?bloodGroup=${encodeURIComponent(bloodGroup)}&district=${districtName}&upazila=${upazilaName}`
+        `https://server-site-rose.vercel.app/api/v1/donors/search?bloodGroup=${encodeURIComponent(bloodGroup)}&district=${districtName}&upazila=${upazila}`
       );
       const data = await res.json();
       setDonors(data);
@@ -75,7 +64,7 @@ export default function SearchDonorPage() {
           Find a <span className="text-rose-600">Blood Donor</span>
         </h1>
 
-        {/* Search Form */}
+   
         <form onSubmit={handleSearch} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-10">
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">Blood Group</label>
@@ -102,6 +91,7 @@ export default function SearchDonorPage() {
             >
               <option value="">Select District</option>
               {districts.map((d, index) => (
+               
                 <option key={`district-${d.id}-${index}`} value={d.district_id}>
                   {d.bn_name} ({d.name})
                 </option>
@@ -120,6 +110,7 @@ export default function SearchDonorPage() {
             >
               <option value="">Select Upazila</option>
               {upazilas.map((u, index) => (
+               
                 <option key={`upazila-${u.id}-${index}`} value={u.name}>
                   {u.bn_name} ({u.name})
                 </option>
@@ -135,23 +126,15 @@ export default function SearchDonorPage() {
           </button>
         </form>
 
-        {/* Results Section */}
+        
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-4">
-            Search Results {searched && `(${donors.length})`}
-          </h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-4">Search Results ({donors.length})</h2>
           
           {loading ? (
             <div className="flex justify-center py-10">
               <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-600 border-t-transparent"></div>
             </div>
-          ) : !searched ? (
-            /* 🔥 ১. সার্চ করার আগের ডিফল্ট স্টেট (রিকোয়ারমেন্ট অনুযায়ী ফিক্স) */
-            <div className="text-center bg-white py-12 px-4 rounded-2xl border border-slate-100">
-              <p className="text-slate-400 font-medium">Please select Blood Group, District, and Upazila to find donors.</p>
-            </div>
           ) : donors.length > 0 ? (
-            /* ২. ডোনার পাওয়া গেলে রেজাল্ট দেখাবে */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {donors.map((donor) => (
                 <div key={donor._id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
@@ -169,9 +152,8 @@ export default function SearchDonorPage() {
               ))}
             </div>
           ) : (
-            /* ৩. সার্চ করার পর যদি কোনো ডোনার না পাওয়া যায় */
             <div className="text-center bg-white py-12 px-4 rounded-2xl border border-slate-100">
-              <p className="text-red-400 font-medium">No donors found for the selected area or blood group.</p>
+              <p className="text-slate-400 font-medium">No donors found for the selected area or blood group.</p>
             </div>
           )}
         </div>
